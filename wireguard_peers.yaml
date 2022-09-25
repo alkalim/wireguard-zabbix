@@ -1,0 +1,209 @@
+zabbix_export:
+  version: '6.2'
+  date: '2022-09-25T13:12:15Z'
+  template_groups:
+    -
+      uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    -
+      uuid: e945b58cad3a42438253e667c4ad44be
+      template: 'Wireguard peers by Zabbix agent active'
+      name: 'Wireguard peers by Zabbix agent active'
+      groups:
+        -
+          name: Templates/Applications
+      items:
+        -
+          uuid: 10df80cf4e0d472bbc322fda05458dfc
+          name: 'Wireguard peers master'
+          type: ZABBIX_ACTIVE
+          key: wireguard.peers
+          trends: '0'
+          value_type: TEXT
+          description: 'Master item for Wireguard stats about peers'
+      discovery_rules:
+        -
+          uuid: 9a5ad6e1820c42a6829475cea7db289f
+          name: 'Wireguard peer discovery'
+          type: DEPENDENT
+          key: wireguard.peer.discovery
+          delay: '0'
+          description: 'Wireguard peer discovery rule'
+          item_prototypes:
+            -
+              uuid: 8ef67847561a49b6aed7385df673bb01
+              name: 'Wireguard {#PEER_NAME} ({#PEERNO}): Bytes received per second'
+              type: DEPENDENT
+              key: 'wireguard.rx[{#PUBLIC_KEY},bps]'
+              delay: '0'
+              units: Bps
+              description: 'Number of bytes received per second for peer {#PEER_NAME} (peerno {#PEERNO})'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$..[?(@.publicKey=="{#PUBLIC_KEY}")].transferRx.first()'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: wireguard.peers
+              tags:
+                -
+                  tag: component
+                  value: network
+                -
+                  tag: component
+                  value: vpn
+                -
+                  tag: component
+                  value: wireguard
+            -
+              uuid: 61e36fed332c4853a3659f3bc653d0a5
+              name: 'Wireguard {#PEER_NAME} ({#PEERNO}): Total bytes received'
+              type: DEPENDENT
+              key: 'wireguard.rx[{#PUBLIC_KEY}]'
+              delay: '0'
+              units: B
+              description: 'Number of bytes received for peer {#PEER_NAME} (peerno {#PEERNO})'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$..[?(@.publicKey=="{#PUBLIC_KEY}")].transferRx.first()'
+              master_item:
+                key: wireguard.peers
+              tags:
+                -
+                  tag: component
+                  value: network
+                -
+                  tag: component
+                  value: vpn
+                -
+                  tag: component
+                  value: wireguard
+            -
+              uuid: f261275392b1442d8e0b34c17caad57c
+              name: 'Wireguard {#PEER_NAME} ({#PEERNO}): Bytes sent per second'
+              type: DEPENDENT
+              key: 'wireguard.tx[{#PUBLIC_KEY},bps]'
+              delay: '0'
+              units: B
+              description: 'Number of bytes sent per second for peer {#PEER_NAME} (peerno {#PEERNO})'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$..[?(@.publicKey=="{#PUBLIC_KEY}")].transferTx.first()'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: wireguard.peers
+              tags:
+                -
+                  tag: component
+                  value: network
+                -
+                  tag: component
+                  value: vpn
+                -
+                  tag: component
+                  value: wireguard
+            -
+              uuid: 8e265b6849ed415a96af556c589e51e9
+              name: 'Wireguard {#PEER_NAME} ({#PEERNO}): Total bytes sent'
+              type: DEPENDENT
+              key: 'wireguard.tx[{#PUBLIC_KEY}]'
+              delay: '0'
+              units: B
+              description: 'Number of bytes sent for peer {#PEER_NAME} (peerno {#PEERNO})'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$..[?(@.publicKey=="{#PUBLIC_KEY}")].transferTx.first()'
+              master_item:
+                key: wireguard.peers
+              tags:
+                -
+                  tag: component
+                  value: network
+                -
+                  tag: component
+                  value: vpn
+                -
+                  tag: component
+                  value: wireguard
+          graph_prototypes:
+            -
+              uuid: 14a18f2342574cc189b008cb33657db3
+              name: 'Wireguard {#PEER_NAME} ({#PEERNO}): Network traffic'
+              graph_items:
+                -
+                  color: FF7043
+                  calc_fnc: ALL
+                  item:
+                    host: 'Wireguard peers by Zabbix agent active'
+                    key: 'wireguard.rx[{#PUBLIC_KEY},bps]'
+                -
+                  sortorder: '1'
+                  color: 0080FF
+                  calc_fnc: ALL
+                  item:
+                    host: 'Wireguard peers by Zabbix agent active'
+                    key: 'wireguard.tx[{#PUBLIC_KEY},bps]'
+          master_item:
+            key: wireguard.peers
+          lld_macro_paths:
+            -
+              lld_macro: '{#PEERNO}'
+              path: $.peerNo
+            -
+              lld_macro: '{#PEER_NAME}'
+              path: $.peerName
+            -
+              lld_macro: '{#PUBLIC_KEY}'
+              path: $.publicKey
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $..peers.first()
+      tags:
+        -
+          tag: class
+          value: service
+        -
+          tag: target
+          value: vpn
+        -
+          tag: target
+          value: wireguard
+      dashboards:
+        -
+          uuid: e192074a82e74bd38086f26c04fd9a03
+          name: 'Wireguard network traffic'
+          pages:
+            -
+              widgets:
+                -
+                  type: GRAPH_PROTOTYPE
+                  name: 'Wireguard network traffic by peers'
+                  width: '24'
+                  height: '10'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: rows
+                      value: '2'
+                    -
+                      type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Wireguard peers by Zabbix agent active'
+                        name: 'Wireguard {#PEER_NAME} ({#PEERNO}): Network traffic'
