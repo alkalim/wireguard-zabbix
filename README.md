@@ -1,5 +1,5 @@
 # wireguard-zabbix
-`wireguard-linux` is a Zabbix template to monitor Wireguard peers on Linux. It discovers all your Wireguard peers and monitors incoming/outgoing traffic usage.
+`wireguard-zabbix` is a [Zabbix](https://www.zabbix.com/) template to monitor [Wireguard](https://www.wireguard.com/) peers on Linux. It automatically discovers all your Wireguard peers and collects incoming/outgoing traffic usage.
 
 This template assumes you have installed Wireguard with `wireguard-install.sh` script (see [this repo](https://github.com/Nyr/wireguard-install)). It should work with vanilla Wireguard, but I didn't test it.
 ## Installation
